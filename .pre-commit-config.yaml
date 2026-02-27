@@ -1,8 +1,8 @@
 # https://pre-commit.com
 default_language_version:
-  python: python3.11
+  python: python3.14
 default_install_hook_types: [commit-msg, pre-commit]
-default_stages: [commit, manual]
+default_stages: [pre-commit, manual]
 fail_fast: true
 repos:
   - repo: meta
@@ -18,7 +18,7 @@ repos:
       - id: rst-inline-touching-normal
       - id: text-unicode-replacement-char
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-ast
@@ -54,35 +54,25 @@ repos:
         files: "\\.rej$"
       - id: ruff-check
         name: ruff check
-        entry: poetry run ruff check
+        entry: ruff check --fix
         require_serial: true
         language: system
         types_or: [python, pyi]
       - id: ruff-format
         name: ruff format
-        entry: poetry run ruff format
+        entry: ruff format
         require_serial: true
         language: system
         types_or: [python, pyi]
-      - id: shellcheck
-        name: shellcheck
-        entry: poetry run shellcheck
-        args: [--check-sourced]
-        language: system
-        types: [shell]
-      - id: poetry-check
-        name: poetry check
-        entry: poetry check
+      - id: uv-lock-check
+        name: uv lock check
+        entry: uv lock
+        args: ["--check"]
+        require_serial: true
         language: system
         pass_filenames: false
-      - id: poetry-lock-check
-        name: poetry lock check
-        entry: poetry lock
-        args: [ --check ]
-        language: system
-        pass_filenames: false
-      - id: mypy
-        name: mypy
-        entry: poetry run mypy
+      - id: ty
+        name: ty
+        entry: ty check
         language: system
         types: [python]

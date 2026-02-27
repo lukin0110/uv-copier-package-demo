@@ -12,9 +12,9 @@ help:
 	@echo ""
 	@echo "Commands:"
 	@echo "  lint     Run linters"
-	@echo "  lint     Run safety"
+	@echo "  safety   Run safety"
 	@echo "  test     Run tests"
-	@echo "  lock     Update poetry lock file"
+	@echo "  lock     Update uv lock file"
 	@echo "  shell    Open a shell in the dev container"
 	@echo ""
 
@@ -33,10 +33,10 @@ safety:
 test:
 	docker compose run devcontainer poe test
 
-# Update poetry lock file
+# Update uv lock file
 .PHONY: lock
 lock:
-	docker compose run devcontainer poetry lock --no-update
+	docker compose run devcontainer uv lock
 
 # Open a docker shell
 .PHONY: shell

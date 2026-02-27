@@ -1,19 +1,19 @@
 # syntax=docker/dockerfile:1
-ARG PYTHON_VERSION=3.11.6
+ARG PYTHON_VERSION=3.14.3
 FROM python:$PYTHON_VERSION-slim AS base
 
-LABEL org.opencontainers.image.description "An example of a Python package that was scaffolded with Poetry Copier"
+LABEL org.opencontainers.image.description="An example of a Python package that was scaffolded with Poetry Copier"
 
 # Configure Python to print tracebacks on crash [1], and to not buffer stdout and stderr [2].
 # [1] https://docs.python.org/3/using/cmdline.html#envvar-PYTHONFAULTHANDLER
 # [2] https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED
-ENV PYTHONFAULTHANDLER 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONFAULTHANDLER=1
+ENV PYTHONUNBUFFERED=1
 
-# Install Poetry.
-ENV POETRY_VERSION 1.7.1
+# Install uv.
+ENV UV_VERSION=0.10.7
 RUN --mount=type=cache,target=/root/.cache/pip/ \
-    pip install poetry==$POETRY_VERSION
+    pip install uv==$UV_VERSION
 
 # Install curl & compilers that may be required for certain packages or platforms.
 # The stock ubuntu image cleans up /var/cache/apt automatically. This makes the build process slow.
@@ -24,16 +24,17 @@ RUN --mount=type=cache,target=/var/cache/apt/ \
     apt-get update && apt-get install --no-install-recommends --yes curl build-essential
 
 # Create and activate a virtual environment.
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
 RUN python -m venv /opt/marty_mcfly-env
-ENV PATH /opt/marty_mcfly-env/bin:$PATH
-ENV VIRTUAL_ENV /opt/marty_mcfly-env
+ENV PATH=/opt/marty_mcfly-env/bin:$PATH
+ENV VIRTUAL_ENV=/opt/marty_mcfly-env
+ENV UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
 
 # Set the working directory.
 WORKDIR /workspaces/marty_mcfly/
 
-# Touch minimal files to allow Poetry to install dependencies.
-RUN mkdir -p /root/.cache/pypoetry/ && mkdir -p /root/.config/pypoetry/ && \
-    mkdir -p src/marty_mcfly/ && touch src/marty_mcfly/__init__.py && touch README.md
+# Touch minimal files to allow uv to install dependencies.
+RUN mkdir -p /root/.cache/uv && mkdir -p src/marty_mcfly/ && touch src/marty_mcfly/__init__.py && touch README.md
 
 
 
@@ -57,9 +58,9 @@ RUN --mount=type=cache,target=/var/cache/apt/ \
     git config --system --add safe.directory '*'
 
 # Install the run time Python dependencies in the virtual environment.
-COPY poetry.lock* pyproject.toml /workspaces/marty_mcfly/
-RUN --mount=type=cache,target=/root/.cache/pypoetry/ \
-    poetry install --no-interaction --no-ansi
+COPY uv.lock* pyproject.toml /workspaces/marty_mcfly/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --all-extras --frozen --compile-bytecode --link-mode copy --python-preference only-system
 
 # Install pre-commit hooks & activate starship.
 COPY .pre-commit-config.yaml /workspaces/marty_mcfly/
