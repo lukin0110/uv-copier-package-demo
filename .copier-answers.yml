@@ -1,10 +1,10 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
 _commit: v0.4.8-3-gd67ffea
-_src_path: git@github.com:lukin0110/poetry-copier.git
+_src_path: git@github.com:lukin0110/uv-copier.git
 ci: github
 description: An example of a Python package that was scaffolded with Poetry Copier
 name: Marty McFly
 package_type: package
-repository_url: https://github.com/lukin0110/poetry-copier-package-demo/
+repository_url: https://github.com/lukin0110/uv-copier-package-demo/
 use_makefile: true
 use_pydantic: true
